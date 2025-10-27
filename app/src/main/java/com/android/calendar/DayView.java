@@ -3956,7 +3956,7 @@ public class DayView extends View implements View.OnCreateContextMenuListener,
             } else {
                 this.post(mClearClick);
             }
-        } else {
+        } else if (!Utils.isReadOnlyKiosk(getContext())) {
             // Select time
             Time startTime = new Time();
             startTime.set(mBaseDate);

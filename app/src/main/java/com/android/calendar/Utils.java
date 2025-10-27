@@ -21,6 +21,7 @@ import static android.provider.CalendarContract.EXTRA_EVENT_BEGIN_TIME;
 import android.Manifest;
 import android.accounts.Account;
 import android.app.Activity;
+import android.app.ActivityManager;
 import android.app.AlarmManager;
 import android.app.SearchManager;
 import android.content.BroadcastReceiver;
@@ -294,6 +295,31 @@ public class Utils {
         }
     }
 
+
+    public static boolean isKioskMode(Context context) {
+        SharedPreferences prefs = GeneralPreferences.Companion.getSharedPreferences(context);
+        boolean isKioskMode = prefs.getBoolean(GeneralPreferences.KEY_KIOSK_SIMULATE_APP_PINNING, false);
+
+        ActivityManager activityManager = (ActivityManager) context.getSystemService(Context.ACTIVITY_SERVICE);
+        if (activityManager != null) {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                // For SDK version 23 and above.
+                isKioskMode |= activityManager.getLockTaskModeState()
+                        != ActivityManager.LOCK_TASK_MODE_NONE;
+            }
+            else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                // Use getLockTaskModeState() for API 21+
+                isKioskMode |= activityManager.isInLockTaskMode();
+            }
+        }
+        return isKioskMode;
+    }
+
+    public static boolean isReadOnlyKiosk(Context context) {
+        SharedPreferences prefs = GeneralPreferences.Companion.getSharedPreferences(context);
+        boolean isReadOnly = prefs.getBoolean(GeneralPreferences.KEY_KIOSK_READ_ONLY, true);
+        return isKioskMode(context) && isReadOnly;
+    }
     /**
      * Gets the intent action for telling the widget to update.
      */

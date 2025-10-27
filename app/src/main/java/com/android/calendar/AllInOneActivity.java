@@ -1003,6 +1003,7 @@ public class AllInOneActivity extends AbstractCalendarActivity implements EventH
                 initFragments(mController.getTime(), mController.getViewType(), null);
             }
         }
+        mFab.setVisibility(Utils.isReadOnlyKiosk(this.getBaseContext()) ? View.GONE : View.VISIBLE);
     }
 
     private void setMainPane(

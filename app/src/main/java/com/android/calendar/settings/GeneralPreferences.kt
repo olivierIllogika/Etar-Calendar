@@ -36,6 +36,7 @@ import android.provider.Settings
 import android.text.TextUtils
 import android.util.SparseIntArray
 import android.widget.Toast
+import androidx.appcompat.app.AppCompatActivity
 import androidx.preference.CheckBoxPreference
 import androidx.preference.ListPreference
 import androidx.preference.Preference
@@ -78,6 +79,8 @@ class GeneralPreferences : PreferenceFragmentCompat(),
     private lateinit var copyDbPref: Preference
     private lateinit var skipRemindersPref: ListPreference
 
+    private lateinit var kioskSimulatePref : Preference
+    private lateinit var kioskReadOnlyPref : Preference
     // >= 26
     private lateinit var notificationPref: Preference
 
@@ -122,6 +125,9 @@ class GeneralPreferences : PreferenceFragmentCompat(),
         defaultReminderPref = preferenceScreen.findPreference(KEY_DEFAULT_REMINDER)!!
         copyDbPref = preferenceScreen.findPreference(KEY_OTHER_COPY_DB)!!
         skipRemindersPref = preferenceScreen.findPreference(KEY_OTHER_REMINDERS_RESPONDED)!!
+
+        kioskSimulatePref = preferenceScreen.findPreference(KEY_KIOSK_SIMULATE_APP_PINNING)!!
+        kioskReadOnlyPref = preferenceScreen.findPreference(KEY_KIOSK_READ_ONLY)!!
 
         val prefs = CalendarUtils.getSharedPreferences(requireActivity(),
                 Utils.SHARED_PREFS_NAME)
@@ -541,6 +547,8 @@ class GeneralPreferences : PreferenceFragmentCompat(),
         private const val KEY_HOME_TZ = "preferences_home_tz"
         private const val FRAG_TAG_TIME_ZONE_PICKER = "TimeZonePicker"
 
+        const val KEY_KIOSK_SIMULATE_APP_PINNING = "preferences_simulate_app_pinning"
+        const val KEY_KIOSK_READ_ONLY = "preferences_kiosk_read_only"
         // experimental
         const val KEY_OTHER_COPY_DB = "preferences_copy_db"
         const val KEY_OTHER_REMINDERS_RESPONDED = "preferences_reminders_responded"

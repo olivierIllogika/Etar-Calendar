@@ -85,6 +85,20 @@
             app:summary="@string/preferences_clear_search_history_summary" />
     </PreferenceCategory>
     <PreferenceCategory
+        app:key="preferences_kiosk_category"
+        app:title="@string/preferences_kiosk">
+        <SwitchPreference
+            app:key="preferences_simulate_app_pinning"
+            app:defaultValue="false"
+            app:title="@string/preferences_simulate_app_pinning"
+            app:summary="@string/preferences_simulate_app_pinning_descrip" />
+        <SwitchPreference
+            app:key="preferences_kiosk_read_only"
+            app:defaultValue="true"
+            app:enabled="false"
+            app:title="@string/preferences_kiosk_read_only" />
+    </PreferenceCategory>
+    <PreferenceCategory
         app:key="preferences_alerts_category"
         app:title="@string/preferences_reminder_title">
         <CheckBoxPreference
