@@ -316,6 +316,8 @@ public class DayView extends View implements View.OnCreateContextMenuListener,
     private ArrayList<Event> mAllDayEvents = new ArrayList<Event>();
     private StaticLayout[] mLayouts = null;
     private StaticLayout[] mAllDayLayouts = null;
+
+    private int mScrollDay = 0;
     private int mSelectionDay;        // Julian day
     private int mSelectionHour;
 
@@ -2454,8 +2456,37 @@ public class DayView extends View implements View.OnCreateContextMenuListener,
                 if (lineY >= mViewStartY && lineY < mViewStartY + mViewHeight - 2) {
                     drawCurrentTimeLine(r, day, lineY, canvas, p);
                 }
+
+
+            }
+            if (false && (mTouchMode & TOUCH_MODE_VSCROLL) != 0 && mScrollDay == cell) {
+                int lineY  = mViewStartY + mViewHeight / 2;
+                drawCurrentTimeLine(r, day, lineY, canvas, p);
+
+                final ArrayList<Event> events = mEvents;
+                int numEvents = events.size();
+                EventGeometry geometry = mEventGeometry;
+
+
+                int left = computeDayLeftPosition(day) + 1;
+                int cellWidth = computeDayLeftPosition(day + 1) - left + 1;
+                final int viewEndY = mViewStartY + mViewHeight - DAY_HEADER_HEIGHT - mAlldayHeight;
+
+                for (int i = 0; i < numEvents; i++) {
+                    Event event = events.get(i);
+                    if (!geometry.computeEventRect(cell, left, 1, cellWidth, event)) {
+                        continue;
+                    }
+
+                    if (event.bottom > lineY && event.top < lineY) {
+                        Log.d(TAG, event.title.toString());
+                    }
+                }
             }
         }
+
+
+
         p.setAntiAlias(true);
         p.setAlpha(alpha);
 
@@ -3918,6 +3949,7 @@ public class DayView extends View implements View.OnCreateContextMenuListener,
             return;
         }
 
+        boolean isReadOnlyKiosk = Utils.isReadOnlyKiosk(getContext());
         boolean hasSelection = mSelectionMode != SELECTION_HIDDEN;
         boolean pressedSelected = (hasSelection || mTouchExplorationEnabled)
                 && selectedDay == mSelectionDay && selectedHour == mSelectionHour;
@@ -3933,7 +3965,7 @@ public class DayView extends View implements View.OnCreateContextMenuListener,
             mController.sendEventRelatedEventWithExtra(this, EventType.CREATE_EVENT, -1,
                     getSelectedTimeInMillis(), 0, (int) ev.getRawX(), (int) ev.getRawY(),
                     extraLong, -1);
-        } else if (mSelectedEvent != null) {
+        } else if (mSelectedEvent != null && !isReadOnlyKiosk) {
             // If the tap is on an event, launch the "View event" view
             if (mIsAccessibilityEnabled) {
                 mAccessibilityMgr.interrupt();
@@ -3956,7 +3988,7 @@ public class DayView extends View implements View.OnCreateContextMenuListener,
             } else {
                 this.post(mClearClick);
             }
-        } else if (!Utils.isReadOnlyKiosk(getContext())) {
+        } else if (!isReadOnlyKiosk) {
             // Select time
             Time startTime = new Time();
             startTime.set(mBaseDate);
@@ -4618,6 +4650,7 @@ public class DayView extends View implements View.OnCreateContextMenuListener,
         }
         day += mFirstJulianDay;
         setSelectedDay(day);
+        mScrollDay = day;
 
         if (y < DAY_HEADER_HEIGHT) {
             sendAccessibilityEventAsNeeded(false);
