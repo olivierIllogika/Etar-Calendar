@@ -67,6 +67,8 @@ import com.android.calendar.settings.GeneralPreferences;
 import com.android.calendar.widget.CalendarAppWidgetProvider;
 import com.android.calendar.calendarcommon2.Time;
 
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
@@ -320,6 +322,35 @@ public class Utils {
         boolean isReadOnly = prefs.getBoolean(GeneralPreferences.KEY_KIOSK_READ_ONLY, true);
         return isKioskMode(context) && isReadOnly;
     }
+
+    public enum LedColor {
+        RED("/sys/class/leds/red/brightness"),
+        GREEN("/sys/class/leds/green/brightness"),
+        BLUE("/sys/class/leds/blue/brightness");
+
+        private final String path;
+
+        LedColor(String path) {
+            this.path = path;
+        }
+
+        public String getPath() {
+            return path;
+        }
+    }
+
+    public static void setLed(LedColor color, boolean isOn) {
+        int value = isOn ? 255 : 0;
+        String path = color.getPath();
+
+        try (FileOutputStream fos = new FileOutputStream(path)) {
+            fos.write(String.valueOf(value).getBytes());
+            fos.flush();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
     /**
      * Gets the intent action for telling the widget to update.
      */

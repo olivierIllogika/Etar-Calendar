@@ -2460,6 +2460,10 @@ public class DayView extends View implements View.OnCreateContextMenuListener,
 
             }
             if (false && (mTouchMode & TOUCH_MODE_VSCROLL) != 0 && mScrollDay == cell) {
+
+                // draw a line in the middle of the screen on the day you're scrolling
+                // this simulates the current time 'lineY' used
+                // to know if currently over a meeting or not
                 int lineY  = mViewStartY + mViewHeight / 2;
                 drawCurrentTimeLine(r, day, lineY, canvas, p);
 
