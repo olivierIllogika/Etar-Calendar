@@ -322,11 +322,44 @@ public class Utils {
         boolean isReadOnly = prefs.getBoolean(GeneralPreferences.KEY_KIOSK_READ_ONLY, true);
         return isKioskMode(context) && isReadOnly;
     }
+/*
+    //    echo 255 > /sys/bus/platform/devices/leds/leds/l0/brightness		// 灭
+//    echo 0 >   /sys/bus/platform/devices/leds/leds/l0/brightness			// 亮
+    var brightness1 = "/sys/bus/platform/devices/leds/leds/l0/brightness"
 
+    //    echo 255 > /sys/bus/platform/devices/leds/leds/l1/brightness		// 灭
+//    echo 0 >   /sys/bus/platform/devices/leds/leds/l1/brightness			// 亮
+    var brightness2 = "/sys/bus/platform/devices/leds/leds/l1/brightness"
+
+    //    echo 255 > /sys/bus/platform/devices/leds/leds/l2/brightness		// 灭
+//    echo 0 >   /sys/bus/platform/devices/leds/leds/l2/brightness			// 亮
+    var brightness3 = "/sys/bus/platform/devices/leds/leds/l2/brightness"
+
+    //    echo 255 > /sys/bus/platform/devices/leds/leds/l3/brightness		// 灭
+//    echo 0 >   /sys/bus/platform/devices/leds/leds/l3/brightness			// 亮
+    var brightness4 = "/sys/bus/platform/devices/leds/leds/l3/brightness"
+
+    //    echo 255 > /sys/bus/platform/devices/leds/leds/h0/brightness		// 灭
+//    echo 0 >   /sys/bus/platform/devices/leds/leds/h0/brightness			// 亮
+    var brightness5 = "/sys/bus/platform/devices/leds/leds/h0/brightness"
+
+    //    echo 255 > /sys/bus/platform/devices/leds/leds/h1/brightness		// 灭
+//    echo 0 >   /sys/bus/platform/devices/leds/leds/h1/brightness			// 亮
+    var brightness6 = "/sys/bus/platform/devices/leds/leds/h1/brightness"
+
+    //    echo 255 > /sys/bus/platform/devices/leds/leds/h2/brightness		// 灭
+//    echo 0 >   /sys/bus/platform/devices/leds/leds/h2/brightness			// 亮
+    var brightness7 = "/sys/bus/platform/devices/leds/leds/h2/brightness"
+
+    //    echo 255 > /sys/bus/platform/devices/leds/leds/h3/brightness		// 灭
+//    echo 0 >   /sys/bus/platform/devices/leds/leds/h3/brightness			// 亮
+    var brightness8 = "/sys/bus/platform/devices/leds/leds/h3/brightness"
+
+ */
     public enum LedColor {
-        RED("/sys/class/leds/red/brightness"),
-        GREEN("/sys/class/leds/green/brightness"),
-        BLUE("/sys/class/leds/blue/brightness");
+        RED("/sys/devices/virtual/adw/adwdev/adwred"),
+        GREEN("/sys/devices/virtual/adw/adwdev/adwgreen"),
+        BLUE("/sys/devices/virtual/adw/adwdev/adwblue");
 
         private final String path;
 
@@ -340,7 +373,7 @@ public class Utils {
     }
 
     public static void setLed(LedColor color, boolean isOn) {
-        int value = isOn ? 255 : 0;
+        int value = isOn ? 'o' : 'c';
         String path = color.getPath();
 
         try (FileOutputStream fos = new FileOutputStream(path)) {
