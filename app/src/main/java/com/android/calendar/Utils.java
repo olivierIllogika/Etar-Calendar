@@ -67,7 +67,9 @@ import com.android.calendar.settings.GeneralPreferences;
 import com.android.calendar.widget.CalendarAppWidgetProvider;
 import com.android.calendar.calendarcommon2.Time;
 
+import java.io.BufferedWriter;
 import java.io.FileOutputStream;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -359,9 +361,42 @@ public class Utils {
     public enum LedColor {
         RED("/sys/devices/virtual/adw/adwdev/adwred"),
         GREEN("/sys/devices/virtual/adw/adwdev/adwgreen"),
-        BLUE("/sys/devices/virtual/adw/adwdev/adwblue");
+        BLUE("/sys/devices/virtual/adw/adwdev/adwblue"),
 
-        private final String path;
+
+    //    echo 255 > /sys/bus/platform/devices/leds/leds/l0/brightness		// 灭
+//    echo 0 >   /sys/bus/platform/devices/leds/leds/l0/brightness			// 亮
+    B1("/sys/bus/platform/devices/leds/leds/l0/brightness"),
+
+    //    echo 255 > /sys/bus/platform/devices/leds/leds/l1/brightness		// 灭
+//    echo 0 >   /sys/bus/platform/devices/leds/leds/l1/brightness			// 亮
+    B2("/sys/bus/platform/devices/leds/leds/l1/brightness"),
+
+    //    echo 255 > /sys/bus/platform/devices/leds/leds/l2/brightness		// 灭
+//    echo 0 >   /sys/bus/platform/devices/leds/leds/l2/brightness			// 亮
+    B3("/sys/bus/platform/devices/leds/leds/l2/brightness"),
+
+    //    echo 255 > /sys/bus/platform/devices/leds/leds/l3/brightness		// 灭
+//    echo 0 >   /sys/bus/platform/devices/leds/leds/l3/brightness			// 亮
+    B4("/sys/bus/platform/devices/leds/leds/l3/brightness"),
+
+    //    echo 255 > /sys/bus/platform/devices/leds/leds/h0/brightness		// 灭
+//    echo 0 >   /sys/bus/platform/devices/leds/leds/h0/brightness			// 亮
+    B5("/sys/bus/platform/devices/leds/leds/h0/brightness"),
+
+    //    echo 255 > /sys/bus/platform/devices/leds/leds/h1/brightness		// 灭
+//    echo 0 >   /sys/bus/platform/devices/leds/leds/h1/brightness			// 亮
+    B6("/sys/bus/platform/devices/leds/leds/h1/brightness"),
+
+    //    echo 255 > /sys/bus/platform/devices/leds/leds/h2/brightness		// 灭
+//    echo 0 >   /sys/bus/platform/devices/leds/leds/h2/brightness			// 亮
+    B7("/sys/bus/platform/devices/leds/leds/h2/brightness"),
+
+    //    echo 255 > /sys/bus/platform/devices/leds/leds/h3/brightness		// 灭
+//    echo 0 >   /sys/bus/platform/devices/leds/leds/h3/brightness			// 亮
+    B8("/sys/bus/platform/devices/leds/leds/h3/brightness");
+
+    private final String path;
 
         LedColor(String path) {
             this.path = path;
@@ -371,13 +406,39 @@ public class Utils {
             return path;
         }
     }
+    //private static final String TAG = "Utils.Led";
+    private static BufferedWriter workUpWriter = null;
 
+    public static void sendCmdToMachine(String id, String fileName) {
+        Log.e(TAG, "mWorkUpDecectNode========================" + fileName + "   id====:" + id);
+        try {
+            workUpWriter = new BufferedWriter(new FileWriter(fileName));
+        } catch (Exception e) {
+            Log.e(TAG, "BufferedWriter/FileWriter error!!" + e.getMessage());
+            return; // exit early since writer creation failed
+        }
+
+        try {
+            workUpWriter.write(id);
+            workUpWriter.flush();
+        } catch (Exception e) {
+            Log.i(TAG, "node error!!" + e.getMessage());
+        } finally {
+            try {
+                if (workUpWriter != null) {
+                    workUpWriter.close();
+                }
+            } catch (Exception e) {
+                Log.i(TAG, "error on close" + e.getMessage());
+            }
+        }
+    }
     public static void setLed(LedColor color, boolean isOn) {
-        int value = isOn ? 'o' : 'c';
+        String value = isOn ? "255" : "0";
         String path = color.getPath();
 
         try (FileOutputStream fos = new FileOutputStream(path)) {
-            fos.write(String.valueOf(value).getBytes());
+            fos.write(value.getBytes());
             fos.flush();
         } catch (IOException e) {
             e.printStackTrace();

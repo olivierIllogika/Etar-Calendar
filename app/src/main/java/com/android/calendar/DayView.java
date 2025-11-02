@@ -2429,6 +2429,7 @@ public class DayView extends View implements View.OnCreateContextMenuListener,
         }
     }
 
+    private boolean inEvent = false;
     private void doDraw(Canvas canvas) {
         Paint p = mPaint;
         Rect r = mRect;
@@ -2459,7 +2460,7 @@ public class DayView extends View implements View.OnCreateContextMenuListener,
 
 
             }
-            if (false && (mTouchMode & TOUCH_MODE_VSCROLL) != 0 && mScrollDay == cell) {
+            if (true && (mTouchMode & TOUCH_MODE_VSCROLL) != 0 && mScrollDay == cell) {
 
                 // draw a line in the middle of the screen on the day you're scrolling
                 // this simulates the current time 'lineY' used
@@ -2476,6 +2477,7 @@ public class DayView extends View implements View.OnCreateContextMenuListener,
                 int cellWidth = computeDayLeftPosition(day + 1) - left + 1;
                 final int viewEndY = mViewStartY + mViewHeight - DAY_HEADER_HEIGHT - mAlldayHeight;
 
+                boolean stillInEvent = false;
                 for (int i = 0; i < numEvents; i++) {
                     Event event = events.get(i);
                     if (!geometry.computeEventRect(cell, left, 1, cellWidth, event)) {
@@ -2483,8 +2485,21 @@ public class DayView extends View implements View.OnCreateContextMenuListener,
                     }
 
                     if (event.bottom > lineY && event.top < lineY) {
-                        Log.d(TAG, event.title.toString());
+                        //Log.d(TAG, event.title.toString());
+                      //  Utils.setLed(Utils.LedColor.RED, true);
+                        //Utils.setLed(Utils.LedColor.GREEN, false);
+                        if (!inEvent) {
+                            Utils.sendCmdToMachine("o", Utils.LedColor.RED.getPath());
+                            Utils.sendCmdToMachine("c", Utils.LedColor.GREEN.getPath());
+                        }
+                        inEvent = true;
+                        stillInEvent = true;
                     }
+                }
+                if (inEvent && !stillInEvent) {
+                    inEvent = false;
+                    Utils.sendCmdToMachine("c", Utils.LedColor.RED.getPath());
+                    Utils.sendCmdToMachine("o", Utils.LedColor.GREEN.getPath());
                 }
             }
         }
