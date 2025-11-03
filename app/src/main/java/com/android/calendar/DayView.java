@@ -2468,39 +2468,15 @@ public class DayView extends View implements View.OnCreateContextMenuListener,
                 int lineY  = mViewStartY + mViewHeight / 2;
                 drawCurrentTimeLine(r, day, lineY, canvas, p);
 
-                final ArrayList<Event> events = mEvents;
-                int numEvents = events.size();
-                EventGeometry geometry = mEventGeometry;
-
-
+                mCurrentTime.setJulianDay(mScrollDay);
+                mCurrentTime.setHour(lineY / (mCellHeight + HOUR_GAP));
+                lineY -= mCurrentTime.getHour() * (mCellHeight + HOUR_GAP);
+                mCurrentTime.setMinute((lineY-1)*60/mCellHeight);
+/*
                 int left = computeDayLeftPosition(day) + 1;
                 int cellWidth = computeDayLeftPosition(day + 1) - left + 1;
                 final int viewEndY = mViewStartY + mViewHeight - DAY_HEADER_HEIGHT - mAlldayHeight;
-
-                boolean stillInEvent = false;
-                for (int i = 0; i < numEvents; i++) {
-                    Event event = events.get(i);
-                    if (!geometry.computeEventRect(cell, left, 1, cellWidth, event)) {
-                        continue;
-                    }
-
-                    if (event.bottom > lineY && event.top < lineY) {
-                        //Log.d(TAG, event.title.toString());
-                      //  Utils.setLed(Utils.LedColor.RED, true);
-                        //Utils.setLed(Utils.LedColor.GREEN, false);
-                        if (!inEvent) {
-                            Utils.sendCmdToMachine("o", Utils.LedColor.RED.getPath());
-                            Utils.sendCmdToMachine("c", Utils.LedColor.GREEN.getPath());
-                        }
-                        inEvent = true;
-                        stillInEvent = true;
-                    }
-                }
-                if (inEvent && !stillInEvent) {
-                    inEvent = false;
-                    Utils.sendCmdToMachine("c", Utils.LedColor.RED.getPath());
-                    Utils.sendCmdToMachine("o", Utils.LedColor.GREEN.getPath());
-                }
+*/
             }
         }
 
@@ -4954,6 +4930,60 @@ public class DayView extends View implements View.OnCreateContextMenuListener,
         super.onDetachedFromWindow();
     }
 
+    private void updateStatusLed() {
+        final ArrayList<Event> events = mEvents;
+        int numEvents = events.size();
+
+        boolean stillInEvent = false;
+        for (int i = 0; i < numEvents; i++) {
+            Event event = events.get(i);
+
+            int startDay = event.startDay;
+            int endDay = event.endDay;
+
+            if (startDay > mTodayJulianDay || endDay < mTodayJulianDay) {
+                continue;
+            }
+
+            int startTime = event.startTime;
+            int endTime = event.endTime;
+
+            // If the event started on a previous day, then show it starting
+            // at the beginning of this day.
+            if (startDay < mTodayJulianDay) {
+                startTime = 0;
+            }
+
+            // If the event ends on a future day, then show it extending to
+            // the end of this day.
+            if (endDay > mTodayJulianDay) {
+                endTime = DayView.MINUTES_PER_DAY;
+            }
+
+            int currentHour = mCurrentTime.getHour();
+            if (endTime > currentHour && startTime < currentHour) {
+                if (!inEvent) {
+                    setStatusLedBusy();
+                }
+                inEvent = true;
+                stillInEvent = true;
+            }
+        }
+        if (inEvent && !stillInEvent) {
+            inEvent = false;
+            setStatusLedFree();
+        }
+    }
+
+    private void setStatusLedBusy() {
+        Utils.sendCmdToMachine("o", Utils.LedColor.RED.getPath());
+        Utils.sendCmdToMachine("c", Utils.LedColor.GREEN.getPath());
+    }
+    private void setStatusLedFree() {
+        Utils.sendCmdToMachine("c", Utils.LedColor.RED.getPath());
+        Utils.sendCmdToMachine("o", Utils.LedColor.GREEN.getPath());
+    }
+
     class DismissPopup implements Runnable {
 
         public void run() {
@@ -4975,6 +5005,7 @@ public class DayView extends View implements View.OnCreateContextMenuListener,
                         - (currentTime % UPDATE_CURRENT_TIME_DELAY));
             }
             mTodayJulianDay = Time.getJulianDay(currentTime, mCurrentTime.getGmtOffset());
+            updateStatusLed();
             invalidate();
         }
     }
