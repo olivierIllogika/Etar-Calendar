@@ -84,6 +84,7 @@ import com.android.calendar.calendarcommon2.Time;
 import com.android.calendar.theme.DynamicThemeKt;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
@@ -2472,11 +2473,8 @@ public class DayView extends View implements View.OnCreateContextMenuListener,
                 mCurrentTime.setHour(lineY / (mCellHeight + HOUR_GAP));
                 lineY -= mCurrentTime.getHour() * (mCellHeight + HOUR_GAP);
                 mCurrentTime.setMinute((lineY-1)*60/mCellHeight);
-/*
-                int left = computeDayLeftPosition(day) + 1;
-                int cellWidth = computeDayLeftPosition(day + 1) - left + 1;
-                final int viewEndY = mViewStartY + mViewHeight - DAY_HEADER_HEIGHT - mAlldayHeight;
-*/
+
+
             }
         }
 
@@ -4363,6 +4361,7 @@ public class DayView extends View implements View.OnCreateContextMenuListener,
                 if (mScrolling) {
                     mScrolling = false;
                     invalidate();
+                    updateStatusLed();
                 }
 
                 if ((mTouchMode & TOUCH_MODE_HSCROLL) != 0) {
@@ -4960,8 +4959,8 @@ public class DayView extends View implements View.OnCreateContextMenuListener,
                 endTime = DayView.MINUTES_PER_DAY;
             }
 
-            int currentHour = mCurrentTime.getHour();
-            if (endTime > currentHour && startTime < currentHour) {
+            int currentDayMinute = mCurrentTime.getHour() * 60 + mCurrentTime.getMinute();
+            if (endTime > currentDayMinute && startTime < currentDayMinute) {
                 if (!inEvent) {
                     setStatusLedBusy();
                 }
@@ -4999,13 +4998,13 @@ public class DayView extends View implements View.OnCreateContextMenuListener,
         public void run() {
             long currentTime = System.currentTimeMillis();
             mCurrentTime.set(currentTime);
+            mTodayJulianDay = Time.getJulianDay(currentTime, mCurrentTime.getGmtOffset());
             //% causes update to occur on 5 minute marks (11:10, 11:15, 11:20, etc.)
             if (!DayView.this.mPaused) {
                 mHandler.postDelayed(mUpdateCurrentTime, UPDATE_CURRENT_TIME_DELAY
                         - (currentTime % UPDATE_CURRENT_TIME_DELAY));
+                updateStatusLed();
             }
-            mTodayJulianDay = Time.getJulianDay(currentTime, mCurrentTime.getGmtOffset());
-            updateStatusLed();
             invalidate();
         }
     }
